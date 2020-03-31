@@ -35,6 +35,13 @@ function goMentions() {
   window.close();
 }
 
+function goGraph() {
+  browser.tabs.create({
+    url: "/index.html?pkg=graph&view=view"
+  });
+  window.close();
+}
+
 
 function goChannels() {
   browser.tabs.create({
@@ -116,6 +123,12 @@ document.getElementById("go-to-mentions").addEventListener("click", (ev) => {
   ev.stopPropagation();
   ev.preventDefault();
   goMentions();
+});
+
+document.getElementById("go-to-graph").addEventListener("click", (ev) => {
+  ev.stopPropagation();
+  ev.preventDefault();
+  goGraph();
 });
 
 keymage("p", goPublic);

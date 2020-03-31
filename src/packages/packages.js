@@ -12,6 +12,7 @@ require("./settings/settings.js");
 require("./hub/hub.js");
 require("./post/post.js");
 require("./blog/blog.js");
+require("./graph/graph.js");
 require("./contacts/contacts.js");
 require("./calendar/calendar.js");
 require("./helpMenu/helpMenu.js");
