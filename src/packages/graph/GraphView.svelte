@@ -6,6 +6,7 @@
     defaultGraph
   } = require("@rdfjs/data-model");
   const { RdfStore } = require("quadstore");
+  const SparqlEngine = require('quadstore-sparql');
   const memdown = require("memdown");
   const N3 = require("n3");
   const { onMount, afterUpdate } = require("svelte");
@@ -33,8 +34,8 @@
       quad(
         namedNode("http://ex.com/s" + i),
         namedNode("http://ex.com/p" + i),
-        namedNode("http://ex.com/o" + i),
-        namedNode("http://ex.com/g")
+        namedNode("http://ex.com/o" + i)/*,
+        namedNode("http://ex.com/g")*/
       )
     );
   }
@@ -71,17 +72,6 @@
           endpoint: "https://query.wikidata.org/bigdata/namespace/wdq/sparql"
         }
       })
-
-      const origQueryFunction = yasqe.query;
-      yasqe.query = function() {
-        console.log(arguments);
-        alert("query: "+yasqe.getValue());
-        const r = origQueryFunction();
-        console.log(r);
-        return r;
-      }
-
-      resultElement.id = Math.random().toString(36).substring(7)
       const yasr = new YASR(resultElement, {
         pluginOrder: ['table', 'response'],
         prefixes: {
@@ -89,13 +79,18 @@
           doi: 'http://dx.doi.org/'
         }
       })
-
-      yasqe.on('queryResponse',
-        (instance, req, duration) => {
-          console.log("on queryResponse");
-          console.log(req);
-          yasr.setResponse(req, duration)
-        })
+      const origQueryFunction = yasqe.query;
+      yasqe.query = function() {
+        const sparqlEngineInstance = new SparqlEngine(store);
+        sparqlEngineInstance.query(yasqe.getValue(), 'application/sparql-results+json'
+        ).catch((err) => {
+            console.log("err: ", err);
+        }).then((result) => {
+            console.log("result!: ", result);
+            yasr.setResponse(result);
+        });
+        return Promise.resolve(true);
+      }
     }
   });
 </script>
