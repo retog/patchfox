@@ -1,4 +1,5 @@
 <script>
+
   const {
     quad,
     namedNode,
@@ -7,14 +8,16 @@
   } = require("@rdfjs/data-model");
   const { RdfStore } = require("quadstore");
   const SparqlEngine = require('quadstore-sparql');
+  const Dataset = require("@rdfjs/dataset");
   const memdown = require("memdown");
   const N3 = require("n3");
-  const { onMount, afterUpdate } = require("svelte");
+  const { onMount, beforeUpdate, afterUpdate } = require("svelte");
   const YASQE = require('@triply/yasqe')
   const YASR = require('@triply/yasr')
   const superagent = require('superagent')
-//import '../../../node_modules/yasqe/build/yasqe.min.css'
-//import '@triply/yasr/build/yasr.min.css'
+  import { DatasetEditor, DatasetBrowser, NamedNodeEditor, 
+            SimpleLiteralEditor, ExistingTermEditor, TermEditor} from "rdfjs-svelte";
+
 
   export let currentSubView = "turtle";
 
@@ -26,7 +29,7 @@
 
   const db = memdown();
 
-  const store = new RdfStore(db);
+  let store = new RdfStore(db);
 
   const quads = [];
   for (let i = 0; i < 20; i++) {
@@ -42,7 +45,9 @@
   store.put(quads).then(() => {
     console.log("Put succeded.");
   });
-
+  console.log("ds creation.");
+  let dataset = Dataset.dataset(quads);
+  console.log(" created ds.", dataset);
   const streamWriter = new N3.StreamWriter({
     prefixes: { ex: "http://ex.com/" }
   });
@@ -63,6 +68,7 @@
   let queryElement
   let resultElement
 
+  //beforeUpdate(() => {
   afterUpdate(() => {
     if (currentSubView === "sparql") {
       
@@ -109,14 +115,14 @@
           <a
             href="#"
             on:click|preventDefault={() => (currentSubView = 'rdf2h')}>
-            RDF2h Rendered
+            View
           </a>
         </li>
-        <li class="tab-item" class:active={currentSubView === 'triplitdown'}>
+        <li class="tab-item" class:active={currentSubView === 'edit'}>
           <a
             href="#"
-            on:click|preventDefault={() => (currentSubView = 'triplitdown')}>
-            Triplitdown
+            on:click|preventDefault={() => (currentSubView = 'edit')}>
+            Edit
           </a>
         </li>
         <li class="tab-item" class:active={currentSubView === 'sparql'}>
@@ -141,6 +147,13 @@
       {#if currentSubView === 'sparql'}
         <div bind:this={queryElement}>editor</div>
         <div bind:this={resultElement}>result</div>
+      {/if}
+      {#if currentSubView === 'edit'}
+        <h2>Edit</h2>
+        <!-- <TermEditor value={namedNode('http://example.org/hello')} /><br> -->
+        <ExistingTermEditor value={literal('Some text')} on:input /><br> 
+        <!-- <SimpleLiteralEditor value={literal('Some text')} on:input /><br> -->
+        <!-- <DatasetEditor bind:value={dataset} /> -->
       {/if}
     </div>
   </div>
