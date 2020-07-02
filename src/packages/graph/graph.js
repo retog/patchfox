@@ -3,12 +3,6 @@ const GraphView = require("./GraphView.svelte");
 patchfox.package({
   name: "graph",
   view: GraphView,
-  messageTypes: [
-    {
-        type: "graph",
-        view: GraphView
-    }
-  ],
   menu: [
     {
       group: "Graph",
